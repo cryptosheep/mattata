@@ -1,11 +1,6 @@
-```
-This project is currently not in continuous development, however updates will be applied whenever possible!
-
-- Matt
-```
-
-
 ![mattata](https://raw.githubusercontent.com/wrxck/mattata/master/assets/logo.png)
+
+Notice: mattata has now resumed development, as of 1st May 2020. For more information, head on over to our [development group](https://telegram.me/mattataDev) on [Telegram](https://telegram.org), or alternatively our [Discord](https://discord.gg/KHQuXaZ).
 
 mattata is a powerful, plugin-based Telegram bot similar to [topkecleon's](https://github.com/topkecleon/otouto). mattata boasts many nifty features such as a fully-fledged administration plugin, AI (native Cleverbot implementation, which utilises my [mattata-ai](https://github.com/wrxck/mattata-ai) library) and much more.
 
