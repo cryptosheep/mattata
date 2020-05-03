@@ -1,6 +1,6 @@
 --[[
     Based on a plugin by topkecleon.
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -76,8 +76,8 @@ function channel:on_message(message, configuration, language)
             }
         }
     })
-    text = '*' .. language['channel']['8'] .. '*\n\n' .. text
-    local success = mattata.send_message(message.chat.id, text, 'markdown', true, false, nil, keyboard)
+    local temp_text = '*' .. language['channel']['8'] .. '*\n\n' .. text
+    local success = mattata.send_message(message.chat.id, temp_text, 'markdown', true, false, nil, keyboard)
     if not success then
         return mattata.send_reply(message, language['channel']['10'])
     end
