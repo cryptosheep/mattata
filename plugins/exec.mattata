@@ -5,7 +5,7 @@
 
 local exec = {}
 local mattata = require('mattata')
-local http = require('socket.http')
+local https = require('ssl.https')
 local ltn12 = require('ltn12')
 local multipart = require('multipart-post')
 local json = require('dkjson')
@@ -127,11 +127,11 @@ function exec.make_request(language, code)
     }
     local response = {}
     local body, boundary = multipart.encode(parameters)
-    local old_timeout = http.TIMEOUT
-    http.TIMEOUT = 2 -- Set the timeout to 2 seconds to prevent people from making the bot lag.
-    local jstr, res = http.request(
+    local old_timeout = https.TIMEOUT
+    https.TIMEOUT = 2 -- Set the timeout to 2 seconds to prevent people from making the bot lag.
+    local jstr, res = https.request(
         {
-            ['url'] = 'http://rextester.com/rundotnet/api/',
+            ['url'] = 'https://rextester.com/rundotnet/api/',
             ['method'] = 'POST',
             ['headers'] = {
                 ['Content-Type'] = 'multipart/form-data; boundary=' .. boundary,
@@ -141,7 +141,7 @@ function exec.make_request(language, code)
             ['sink'] = ltn12.sink.table(response)
         }
     )
-    http.TIMEOUT = old_timeout
+    https.TIMEOUT = old_timeout
     if res ~= 200
     then
         return false

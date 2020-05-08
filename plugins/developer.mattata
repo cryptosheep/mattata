@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -22,14 +22,11 @@ function developer:on_message(message)
         nil,
         mattata.inline_keyboard():row(
             mattata.row():url_button(
-                'Facebook',
-                'https://fb.me/wrxck0'
-            ):url_button(
                 'Twitter',
-                'https://twitter.com/wrxck__'
+                'https://twitter.com/matt__hesketh'
             ):url_button(
                 'Instagram',
-                'https://instagram.com/wrxck_'
+                'https://instagram.com/matt.hesketh'
             ):url_button(
                 'Snapchat',
                 'https://www.snapchat.com/add/wrxck0'

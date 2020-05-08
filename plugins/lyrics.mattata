@@ -261,22 +261,13 @@ function lyrics.send_request(input, inline, no_html)
     end
     output = output:gsub('\\', '')
     output = string.format(
-        '%s%s%s %s\n🕓 %s\n\n%s',
+        '%s%s%s %s\n\n%s',
         not no_html
         and '<b>'
         or '',
         mattata.escape_html(track),
-        not no_html
-        and '</b>'
-        or '',
+        not no_html and '</b>' or '',
         mattata.escape_html(artist),
-        mattata.format_ms(
-            math.floor(
-                tonumber(jdat.message.body.track_list[1].track.track_length) * 1000
-            )
-        )
-        :gsub('^%d%d:', '')
-        :gsub('^0', ''),
         mattata.escape_html(output)
     )
     return output, artist, track
@@ -345,11 +336,9 @@ function lyrics:on_inline_query(inline_query, configuration, language)
         local artist = output.message.body.track_list[n].track.artist_name
         local track = output.message.body.track_list[n].track.track_name
         local track_id = output.message.body.track_list[n].track.track_id
-        local track_length = output.message.body.track_list[n].track.track_length
         if artist
         and track
         and track_id
-        and track_length
         then
             count = count + 1
             local id = socket.gettime() * 10000
@@ -357,8 +346,7 @@ function lyrics:on_inline_query(inline_query, configuration, language)
             local payload = {
                 ['artist'] = artist,
                 ['track'] = track,
-                ['track_id'] = track_id,
-                ['track_length'] = track_length
+                ['track_id'] = track_id
             }
             redis:set(
                 'lyrics:' .. id,
@@ -439,18 +427,9 @@ function lyrics:on_callback_query(callback_query, message, configuration, langua
     end
     output = output:gsub('\\', '')
     output = string.format(
-        '<b>%s</b> %s\n🕓 %s\n\n%s',
+        '<b>%s</b> %s\n\n%s',
         mattata.escape_html(json.decode(data).track),
         mattata.escape_html(json.decode(data).artist),
-        mattata.format_ms(
-            math.floor(
-                tonumber(
-                    json.decode(data).track_length
-                ) * 1000
-            )
-        )
-        :gsub('^%d%d:', '')
-        :gsub('^0', ''),
         mattata.escape_html(output)
     )
     local keyboard = lyrics.get_keyboard(

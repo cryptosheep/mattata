@@ -5,9 +5,9 @@
     | | | | | | (_| | |_| || (_| | || (_| |
     |_| |_| |_|\__,_|\__|\__\__,_|\__\__,_|
 
-    Configuration file for mattata v1.1.0
+    Configuration file for mattata v1.2.0
 
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 
     Each value in an array should be comma separated, with the exception of the last value!
@@ -42,19 +42,20 @@ return { -- Rename this file to configuration.lua for the bot to work!
     ['stripe_test_token'] = '', -- Test payment token you receive from @BotFather.
     ['admins'] = {  -- Here you need to specify the numerical ID of the users who shall have
     -- FULL control over the bot, this includes access to server files via the lua and shell plugins.
-        nil
+        221714512
     },
     ['language'] = 'en', -- The two character locale to set your default language to.
-    ['log_chat'] = nil, -- This needs to be the numerical identifier of the chat you wish to log
+    ['log_chat'] = -1000000000000, -- This needs to be the numerical identifier of the chat you wish to log
     -- errors into. If it's not a private chat it should begin with a '-' symbol.
     ['log_admin_actions'] = true, -- Should administrative actions be logged? [true/false]
-    ['log_channel'] = nil, -- This needs to be the numerical identifier of the channel you wish
+    ['log_channel'] = -1000000000000, -- This needs to be the numerical identifier of the channel you wish
     -- to log administrative actions in by default. It should begin with a '-' symbol.
-    ['bug_reports_chat'] = nil, -- This needs to be the numerical identifier of the chat you wish to send
+    ['bug_reports_chat'] = -1000000000000, -- This needs to be the numerical identifier of the chat you wish to send
     -- bug reports into. If it's not a private chat it should begin with a '-' symbol.
-    ['counter_channel'] = nil, -- This needs to be the numerical identifier of the channel you wish
+    ['counter_channel'] = -1000000000000, -- This needs to be the numerical identifier of the channel you wish
     -- to forward messages into, for use with the /counter command. It should begin with a '-' symbol.
     ['download_location'] = '/tmp/', -- The location to save all downloaded media to.
+    ['fonts_directory'] = '/tmp/fonts', -- The location where fonts are stored for CAPTCHAs (this will be in the ./fonts folder that came in the repository)
     ['respond_to_misc'] = true, -- Respond to shitpostings/memes in mattata.lua? [true/false]
     ['max_copypasta_length'] = 300, -- The maximum number of characters a message can have to be
     -- able to have /copypasta used on it.
@@ -74,6 +75,7 @@ return { -- Rename this file to configuration.lua for the bot to work!
         ['lastfm'] = '', -- http://www.last.fm/api/account/create
         ['weather'] = '', -- https://darksky.net/dev/register
         ['youtube'] = '', -- https://console.developers.google.com/apis
+        ['maps'] = '', -- https://console.cloud.google.com/google/maps-apis
         ['bing'] = '', -- https://datamarket.azure.com/account/keys
         ['flickr'] = '', -- https://www.flickr.com/services/apps/create/noncommercial/?
         ['news'] = '', -- https://newsapi.org/

@@ -249,7 +249,7 @@ function help:on_callback_query(callback_query, message, configuration, language
                     'https://t.me/mattataLog'
                 ):url_button(
                     'Twitter',
-                    'https://twitter.com/intent/user?screen_name=wrxck__'
+                    'https://twitter.com/intent/user?screen_name=matt__hesketh'
                 )
             ):row(
                 mattata.row():callback_data_button(
@@ -267,12 +267,6 @@ function help:on_callback_query(callback_query, message, configuration, language
             true,
             mattata.inline_keyboard():row(
                 mattata.row():url_button(
-                    'Fun Anagrams',
-                    'https://t.me/joinchat/AAAAAELATAtOpNdrLRHtpg'
-                ):url_button(
-                    'ａｅｓｔｈｅｔｉｃ',
-                    'https://t.me/aesthetic_things'
-                ):url_button(
                     'no context',
                     'https://t.me/no_context'
                 )

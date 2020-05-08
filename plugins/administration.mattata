@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -7,6 +7,7 @@ local administration = {}
 local mattata = require('mattata')
 local json = require('dkjson')
 local redis = dofile('libs/redis.lua')
+local captcha = require('captcha')
 local configuration = require('configuration')
 
 function administration:init()
@@ -15,6 +16,31 @@ function administration:init()
     :command('admins')
     :command('staff')
     :command('whitelistlink').table
+end
+
+function administration:on_member_join(message, configuration, language)
+    if mattata.get_setting(message.chat.id, 'require captcha') and tostring(message.new_chat_participant.is_bot) ~= 'true' and not mattata.get_captcha_id(message.chat.id, message.new_chat_participant.id) then
+        local download_location = configuration.download_location
+        if download_location:match('/$') then
+            download_location = download_location:match('^(.-)/$')
+        end
+        local new_cap = captcha.new()
+        new_cap:setlength(6)
+        new_cap:setfontsize(40)
+        new_cap:setpath(download_location)
+        new_cap:setformat('jpg')
+        new_cap:setfontsfolder(configuration.fonts_directory)
+        local gen = new_cap:generate()
+        local correct = gen:match('^' .. download_location .. '/(.-)%.jpg$')
+        local msg = string.format('Hey, [%s](tg://user?id=%s)! Please enter the CAPTCHA below before you can speak!', message.new_chat_participant.first_name, message.new_chat_participant.id)
+        local to_edit = mattata.send_message(message.chat.id, msg, 'markdown')
+        local success = mattata.send_photo(message.chat.id, gen)
+        if not success then
+            return false
+        end
+        mattata.set_captcha(message.chat.id, message.new_chat_participant.id, success.result.message_id, correct, to_edit.result.message_id)
+        return mattata.delete_message(message.chat.id, message.message_id) 
+    end
 end
 
 function administration.get_initial_keyboard(chat_id, page)
@@ -141,6 +167,14 @@ function administration.get_initial_keyboard(chat_id, page)
             :callback_data_button(
                 mattata.get_setting(chat_id, 'delete reply on action') and utf8.char(9989) or utf8.char(10060),
                 'administration:' .. chat_id .. ':delete_reply_on_action:3'
+            )
+        )
+        :row(
+            mattata.row()
+            :callback_data_button('Require Captcha?', 'administration:nil')
+            :callback_data_button(
+                mattata.get_setting(chat_id, 'require captcha') and utf8.char(9989) or utf8.char(10060),
+                'administration:' .. chat_id .. ':require_captcha:3'
             )
         ):row(mattata.row():callback_data_button('Back', 'administration:' .. chat_id .. ':page:2'))
     end
@@ -648,6 +682,14 @@ function administration:on_callback_query(callback_query, message, configuration
         mattata.toggle_setting(
             chat_id,
             'delete reply on action'
+        )
+        keyboard = administration.get_initial_keyboard(chat_id, page)
+    elseif callback_query.data:match('^%-%d+:require_captcha:%d*$')
+    then
+        local chat_id, page = callback_query.data:match('^(%-%d+):require_captcha:(%d*)$')
+        mattata.toggle_setting(
+            chat_id,
+            'require captcha'
         )
         keyboard = administration.get_initial_keyboard(chat_id, page)
     elseif callback_query.data:match('^%-%d+:enable_admins_only:%d*$')

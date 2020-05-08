@@ -131,6 +131,28 @@ function utils.get_log_chat(chat_id)
     return redis:hget('chat:' .. chat_id .. ':settings', 'log chat') or configuration.log_channel or false
 end
 
+function utils.set_captcha(chat_id, user_id, id, text, original_message)
+    redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'id', id)
+    redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'text', text)
+    return redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'original message', original_message)
+end
+
+function utils.get_captcha_id(chat_id, user_id)
+    return redis:hget('chat:' .. chat_id .. ':captcha:' .. user_id, 'id')
+end
+
+function utils.get_captcha_text(chat_id, user_id)
+    return redis:hget('chat:' .. chat_id .. ':captcha:' .. user_id, 'text')
+end
+
+function utils.get_captcha_original_message(chat_id, user_id)
+    return redis:hget('chat:' .. chat_id .. ':captcha:' .. user_id, 'original message')
+end
+
+function utils.delete_redis_hash(hash, field)
+    return redis:hdel(hash, field)
+end
+
 function utils.get_missing_languages(delimiter)
     local missing_languages = redis:smembers('mattata:missing_languages')
     if not missing_languages then

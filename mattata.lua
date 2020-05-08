@@ -5,9 +5,9 @@
       | | | | | | (_| | |_| || (_| | || (_| |
       |_| |_| |_|\__,_|\__|\__\__,_|\__\__,_|
 
-      v1.1.0
+      v1.2.0
 
-      Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+      Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
       See LICENSE for details
 
 ]]
@@ -83,124 +83,26 @@ function mattata:init()
 end
 
 -- Set a bunch of function aliases, for consistency & compatibility.
-mattata.request = api.request
-mattata.get_me = api.get_me
-mattata.send_message = api.send_message
-mattata.forward_message = api.forward_message
-mattata.send_photo = api.send_photo
-mattata.send_audio = api.send_audio
-mattata.send_document = api.send_document
-mattata.send_sticker = api.send_sticker
-mattata.send_video = api.send_video
-mattata.send_voice = api.send_voice
-mattata.send_location = api.send_location
-mattata.send_venue = api.send_venue
-mattata.send_contact = api.send_contact
-mattata.send_chat_action = api.send_chat_action
-mattata.get_user_profile_photos = api.get_user_profile_photos
-mattata.get_file = api.get_file
-mattata.ban_chat_member = api.ban_chat_member
-mattata.kick_chat_member = api.kick_chat_member
-mattata.unban_chat_member = api.unban_chat_member
-mattata.restrict_chat_member = api.restrict_chat_member
-mattata.promote_chat_member = api.promote_chat_member
-mattata.export_chat_invite_link = api.export_chat_invite_link
-mattata.set_chat_photo = api.set_chat_photo
-mattata.delete_chat_photo = api.delete_chat_photo
-mattata.set_chat_title = api.set_chat_title
-mattata.set_chat_description = api.set_chat_description
-mattata.pin_chat_message = api.pin_chat_message
-mattata.unpin_chat_message = api.unpin_chat_message
-mattata.leave_chat = api.leave_chat
-mattata.get_chat_administrators = api.get_chat_administrators
-mattata.get_chat_members_count = api.get_chat_members_count
-mattata.get_chat_member = api.get_chat_member
-mattata.answer_callback_query = api.answer_callback_query
-mattata.edit_message_text = api.edit_message_text
-mattata.edit_message_caption = api.edit_message_caption
-mattata.edit_message_reply_markup = api.edit_message_reply_markup
-mattata.delete_message = api.delete_message
-mattata.get_sticker_set = api.get_sticker_set
-mattata.upload_sticker_file = api.upload_sticker_file
-mattata.create_new_sticker_set = api.create_new_sticker_set
-mattata.add_sticker_to_set = api.add_sticker_to_set
-mattata.set_sticker_position_in_set = api.set_sticker_position_in_set
-mattata.delete_sticker_from_set = api.delete_sticker_from_set
-mattata.answer_inline_query = api.answer_inline_query
-mattata.send_invoice = api.send_invoice
-mattata.answer_shipping_query = api.answer_shipping_query
-mattata.answer_pre_checkout_query = api.answer_pre_checkout_query
-mattata.send_game = api.send_game
-mattata.set_game_score = api.set_game_score
-mattata.get_game_high_scores = api.get_game_high_scores
-mattata.input_text_message_content = api.input_text_message_content
-mattata.input_location_message_content = api.input_location_message_content
-mattata.input_venue_message_content = api.input_venue_message_content
-mattata.input_contact_message_content = api.input_contact_message_content
-mattata.mask_position = api.mask_position
-mattata.url_button = api.url_button
-mattata.callback_data_button = api.callback_data_button
-mattata.switch_inline_query_button = api.switch_inline_query_button
-mattata.switch_inline_query_current_chat_button = api.switch_inline_query_current_chat_button
-mattata.callback_game_button = api.callback_game_button
-mattata.pay_button = api.pay_button
-mattata.row = api.row
-mattata.inline_keyboard = api.inline_keyboard
-mattata.keyboard = api.keyboard
-mattata.remove_keyboard = api.remove_keyboard
-mattata.send_inline_article = api.send_inline_article
-mattata.send_inline_photo = api.send_inline_photo
-mattata.inline_result = api.inline_result
-
-mattata.trim = tools.trim
-mattata.comma_value = tools.comma_value
-mattata.format_ms = tools.format_ms
-mattata.round = tools.round
-mattata.symbols = tools.symbols
-mattata.utf8_len = tools.utf8_len
-mattata.get_linked_name = tools.get_linked_name
-mattata.table_size = tools.table_size
-mattata.download_file = tools.download_file
-mattata.create_link = tools.create_link
-mattata.commands = tools.commands
-mattata.escape_markdown = tools.escape_markdown
-mattata.escape_html = tools.escape_html
-mattata.escape_bash = tools.escape_bash
-
-mattata.send_reply = utils.send_reply
-mattata.service_message = utils.service_message
-mattata.is_media = utils.is_media
-mattata.media_type = utils.media_type
-mattata.file_id = utils.file_id
-mattata.is_trusted_user = utils.is_trusted_user
-mattata.get_inline_help = utils.get_inline_help
-mattata.get_chat_id = utils.get_chat_id
-mattata.get_setting = utils.get_setting
-mattata.get_value = utils.get_value
-mattata.get_user_count = utils.get_user_count
-mattata.get_group_count = utils.get_group_count
-mattata.clear_broadcast_memory = utils.clear_broadcast_memory
-mattata.get_user_language = utils.get_user_language
-mattata.get_log_chat = utils.get_log_chat
-mattata.get_missing_languages = utils.get_missing_languages
-mattata.purge_user = utils.purge_user
-mattata.get_user_message_statistics = utils.get_user_message_statistics
-mattata.reset_message_statistics = utils.reset_message_statistics
-mattata.is_group = utils.is_group
-mattata.toggle_user_setting = utils.toggle_user_setting
-mattata.get_user_setting = utils.get_user_setting
-mattata.get_input = utils.get_input
-mattata.log_error = utils.log_error
-mattata.write_file = utils.write_file
+for i, v in pairs(api) do
+    mattata[i] = v
+end
+for i, v in pairs(tools) do
+    mattata[i] = v
+end
+for i, v in pairs(utils) do
+    if i ~= 'init' then
+        mattata[i] = v
+    end
+end
 
 function mattata:run(configuration, token)
 -- mattata's main long-polling function which repeatedly checks the Telegram bot API for updates.
 -- The objects received in the updates are then further processed through object-specific functions.
     token = token or configuration.bot_token
     assert(token, 'You need to enter your Telegram bot API token in configuration.lua, or pass it as the second argument when using the mattata:run() function!')
-    local is_running = mattata.init(self) -- Initialise the bot.
+    mattata.is_running = mattata.init(self) -- Initialise the bot.
     utils.init(self, configuration)
-    while is_running do -- Perform the main loop whilst the bot is running.
+    while mattata.is_running do -- Perform the main loop whilst the bot is running.
         local success = api.get_updates( -- Check the Telegram bot API for updates.
             1,
             self.last_update + 1,
@@ -411,6 +313,63 @@ function mattata:on_message()
                         end
                         self.is_done = true
                     end
+                elseif message.new_chat_participant and plugin.on_member_join and not mattata.is_plugin_disabled(plugin.name, message) and not self.is_done then
+                    local success, result = pcall(
+                        function()
+                            return plugin.on_member_join(self, message, configuration, language)
+                        end
+                    )
+                    if not success then
+                        mattata.exception(self, result, string.format('%s: %s', message.from.id, message.text),
+                        configuration.log_chat)
+                    end
+                    self.is_done = true
+                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and message.reply then
+                    if message.reply.from.id == self.info.id and message.reply.photo then
+                        if tostring(message.reply.message_id) == tostring(mattata.get_captcha_id(message.chat.id, message.from.id)) then
+                            local id = mattata.get_captcha_id(message.chat.id, message.from.id)
+                            local text = mattata.get_captcha_text(message.chat.id, message.from.id)
+                            local original_msg = mattata.get_captcha_original_message(message.chat.id, message.from.id)
+                            if message.text:lower() == text:lower() then -- allow some leniency
+                                local success = mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', true, true, true, true, true, false, false, false)
+                                if not success then
+                                    return mattata.send_message(message.chat.id, 'I could not give that user their permissions. You may have to do this manually!')
+                                end
+                                mattata.delete_message(message.chat.id, tonumber(id))
+                                mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
+                                mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
+                                mattata.edit_message_text(message.chat.id, tonumber(original_msg), 'Success! You may now speak!')
+                                return mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                            elseif not message.new_chat_participant then
+                                mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)
+                                mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
+                                mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
+                                mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                                return mattata.send_reply(message, 'You failed to answer it correctly! If you want to be unmuted now, you need to consult an admin!')
+                            end
+                        end
+                    end
+                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and mattata.get_captcha_id(message.chat.id, message.from.id) then
+                    local id = mattata.get_captcha_id(message.chat.id, message.from.id)
+                    local text = mattata.get_captcha_text(message.chat.id, message.from.id)
+                    local original_msg = mattata.get_captcha_original_message(message.chat.id, message.from.id)
+                    if message.text:lower() == text:lower() then -- allow some leniency
+                        local success = mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', true, true, true, true, true, false, false, false)
+                        if not success then
+                            return mattata.send_message(message.chat.id, 'I could not give that user their permissions. You may have to do this manually!')
+                        end
+                        mattata.delete_message(message.chat.id, tonumber(id))
+                        mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
+                        mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
+                        mattata.edit_message_text(message.chat.id, tonumber(original_msg), 'Success! You may now speak!')
+                        return mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                    elseif not message.new_chat_participant then
+                        mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)                        
+                        mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
+                        mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
+                        mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                        return mattata.send_reply(message, 'You failed to answer it correctly! If you want to be unmuted now, you need to consult an admin!')
+                    end
                 end
             end
         end
@@ -473,11 +432,6 @@ function mattata:process_plugin_extras()
             ),
             'html'
         )
-    elseif not mattata.is_plugin_disabled('ai', message) and message.chat.type ~= 'channel' and not redis:sismember('ainotice', tostring(message.chat.id)) then
-        local success = mattata.send_message(message.chat.id, '*IMPORTANT* My AI functionality has moved to a dedicated bot to allow me to do everything else even faster! This is one of many huge changes coming over the next couple of months! The new AI is @mattataaibot. It does NOT need administrative permissions to work!', 'markdown')
-        if success then
-            redis:sadd('ainotice', tostring(message.chat.id))
-        end
     end
 
     if ( -- If a user executes a command and it's not recognised, provide a response

@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -16,24 +16,10 @@ end
 
 function plugins.get_toggleable_plugins()
     local toggleable = {}
-    for k, v in pairs(configuration.plugins)
-    do
+    for k, v in pairs(configuration.plugins) do
         if v ~= 'plugins' and v ~= 'control' and v ~= 'bash' and v ~= 'lua' and v ~= 'gwhitelist' and v ~= 'gblacklist' then
-            table.insert(
-                toggleable,
-                v
-            )
+            table.insert(toggleable, v)
         end
-    end
-    local extra_plugins = {
-        'ai',
-        'captionbotai'
-    }
-    for k, v in pairs(extra_plugins) do
-        table.insert(
-            toggleable,
-            v
-        )
     end
     table.sort(toggleable)
     return toggleable
@@ -62,21 +48,15 @@ function plugins.get_keyboard(chat, page, columns, per_page)
         plugin = plugin + 1
         if plugin >= start_res and plugin <= end_res then
             local status = ''
-            if not mattata.is_plugin_disabled(
-                v,
-                chat
-            ) then
+            if not mattata.is_plugin_disabled(v, chat) then
                 status = utf8.char(9989)
             else
                 status = utf8.char(10060)
             end
-            table.insert(
-                output,
-                {
-                    ['plugin'] = v,
-                    ['status'] = status
-                }
-            )
+            table.insert(output, {
+                ['plugin'] = v,
+                ['status'] = status
+            })
         end
     end
     local keyboard = {
@@ -348,7 +328,7 @@ function plugins:on_message(message, configuration)
         message.from.id,
         string.format(
             'Toggle the plugins for <b>%s</b> using the keyboard below:',
-            mattata.escape_html(message.chat.title)
+            message.chat.title and mattata.escape_html(message.chat.title) or mattata.escape_html(message.chat.first_name)
         ),
         'html',
         true,
