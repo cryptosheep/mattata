@@ -20,6 +20,12 @@ end
 
 function administration:on_member_join(message, configuration, language)
     if mattata.get_setting(message.chat.id, 'require captcha') and tostring(message.new_chat_participant.is_bot) ~= 'true' and not mattata.get_captcha_id(message.chat.id, message.new_chat_participant.id) then
+        local chat_member = mattata.get_chat_member(message.chat.id, message.new_chat_participant.id)
+        if not chat_member then -- we can't even get info about the user? abort! abort!
+            return false
+        elseif chat_member.result.can_send_messages == false then -- if it's nill it means he's already muted!
+            return false
+        end
         local download_location = configuration.download_location
         if download_location:match('/$') then
             download_location = download_location:match('^(.-)/$')
@@ -31,8 +37,9 @@ function administration:on_member_join(message, configuration, language)
         new_cap:setformat('jpg')
         new_cap:setfontsfolder(configuration.fonts_directory)
         local gen = new_cap:generate()
+        local username = message.new_chat_participant.username and '@' .. message.new_chat_participant.username or false
+        local msg = string.format('Hey, [%s](tg://user?id=%s)! Please enter the CAPTCHA below before you can speak!', username or mattata.escape_markdown(message.new_chat_participant.first_name), message.new_chat_participant.id)
         local correct = gen:match('^' .. download_location .. '/(.-)%.jpg$')
-        local msg = string.format('Hey, [%s](tg://user?id=%s)! Please enter the CAPTCHA below before you can speak!', message.new_chat_participant.first_name, message.new_chat_participant.id)
         local to_edit = mattata.send_message(message.chat.id, msg, 'markdown')
         local success = mattata.send_photo(message.chat.id, gen)
         if not success then

@@ -341,15 +341,18 @@ function mattata:on_message()
                                 mattata.edit_message_text(message.chat.id, tonumber(original_msg), 'Success! You may now speak!')
                                 return mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
                             elseif not message.new_chat_participant then
-                                mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)
+                                local success = mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)
                                 mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
                                 mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
                                 mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                                if not success then
+                                    return mattata.send_reply(message, 'I couldn\'t restrict that user, do I have the correct permissions?')
+                                end
                                 return mattata.send_reply(message, 'You failed to answer it correctly! If you want to be unmuted now, you need to consult an admin!')
                             end
                         end
                     end
-                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and mattata.get_captcha_id(message.chat.id, message.from.id) then
+                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and mattata.get_captcha_id(message.chat.id, message.from.id) and not message.reply then
                     local id = mattata.get_captcha_id(message.chat.id, message.from.id)
                     local text = mattata.get_captcha_text(message.chat.id, message.from.id)
                     local original_msg = mattata.get_captcha_original_message(message.chat.id, message.from.id)
@@ -364,10 +367,15 @@ function mattata:on_message()
                         mattata.edit_message_text(message.chat.id, tonumber(original_msg), 'Success! You may now speak!')
                         return mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
                     elseif not message.new_chat_participant then
-                        mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)                        
+                        local success = mattata.restrict_chat_member(message.chat.id, message.from.id, 'forever', false, false, false, false, false, false, false, false)                        
                         mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'id')
                         mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'text')
                         mattata.delete_redis_hash('chat:' .. message.chat.id .. ':captcha:' .. message.from.id, 'original message')
+                        if not success then
+                            return mattata.send_reply(message, 'I couldn\'t restrict that user, do I have the correct permissions?')
+                        end
+                        mattata.delete_message(message.chat.id, tonumber(id))
+                        mattata.delete_message(message.chat.id, tonumber(original_msg))
                         return mattata.send_reply(message, 'You failed to answer it correctly! If you want to be unmuted now, you need to consult an admin!')
                     end
                 end
@@ -1410,6 +1418,10 @@ function mattata:process_message()
         end
     end
     if message.new_chat_members and message.chat.type ~= 'private' and mattata.get_setting(message.chat.id, 'use administration') and mattata.get_setting(message.chat.id, 'welcome message') then
+        local chat_member = mattata.get_chat_member(message.chat.id, message.new_chat_members[1].from.id)
+        if chat_member.result.can_send_messages == false then
+            return mattata.delete_message(message.chat.id, message.message_id)
+        end
         local name = message.new_chat_members[1].first_name
         local first_name = mattata.escape_markdown(name)
         if message.new_chat_members[1].last_name then

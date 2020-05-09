@@ -26,42 +26,38 @@ function lua:init()
 end
 
 function lua:on_message(message, configuration, language)
-    if not mattata.is_global_admin(message.from.id)
-    then
+    if not mattata.is_global_admin(message.from.id) then
         return
     end
     local input = mattata.input(message.text)
-    if not input
-    then
-        return mattata.send_reply(
-            message,
-            language['lua']['1']
-        )
+    if not input then
+        local text = language['lua']['1']
+        return mattata.send_reply(message, text)
     end
     local output, success = (load or loadstring)([[
-	local mattata = require('mattata')
-	local configuration = require('configuration')
-	local api = require('telegram-bot-lua.core').configure(configuration.bot_token)
-	local tools = require('telegram-bot-lua.tools')
-	local https = require('ssl.https')
-	local http = require('socket.http')
-	local url = require('socket.url')
-	local ltn12 = require('ltn12')
-	local json = require('dkjson')
-	local utf8 = require('lua-utf8')
-	local socket = require('socket')
-	return function (message, configuration, self)
-	]] .. input .. [[
-	end]])
+    local mattata = require('mattata')
+    local configuration = require('configuration')
+    local api = require('telegram-bot-lua.core').configure(configuration.bot_token)
+    local tools = require('telegram-bot-lua.tools')
+    local https = require('ssl.https')
+    local http = require('socket.http')
+    local url = require('socket.url')
+    local ltn12 = require('ltn12')
+    local json = require('dkjson')
+    local utf8 = require('lua-utf8')
+    local socket = require('socket')
+    return function (message, configuration, self)
+    ]] .. input .. [[
+    end]])
     if output == nil then
-	    output = success
-	else
+        output = success
+    else
         success, output = xpcall(
             output(),
             lua.error_message,
             message,
             configuration,
-			self
+            self
         )
     end
     if output ~= nil and type(output) == 'table' then

@@ -4,18 +4,18 @@ printf "or press CTRL + C to abort.\n"
 read
 set -e
 sudo apt-get update
-aptlist="git wget openssl coreutils make gcc libreadline-dev libssl-dev redis-server unzip libexpat1-dev libcurl3 libcurl3-gnutls libcurl4-openssl-dev ruby ruby-dev libgd-dev"
+aptlist="git wget openssl coreutils make gcc libreadline-dev libssl-dev libssl1.0-dev redis-server unzip libexpat1-dev libcurl3 libcurl3-gnutls libcurl4-openssl-dev ruby ruby-dev libgd-dev"
 for package in $aptlist; do
     printf "[Info] Installing $package...\n"
     sudo apt-get install $package
 done
 if [ ! -f "`which lua`" ]; then
-    printf "[Info] Downloading Lua 5.3.4...\n"
-    wget -N http://www.lua.org/ftp/lua-5.3.4.tar.gz
-    printf "[Info] Extracting Lua 5.3.4...\n"
-    tar zxf lua-5.3.4.tar.gz
-    cd lua-5.3.4/
-    printf "[Info] Installing Lua 5.3.4...\n"
+    printf "[Info] Downloading Lua 5.3.5...\n"
+    wget -N http://www.lua.org/ftp/lua-5.3.5.tar.gz
+    printf "[Info] Extracting Lua 5.3.5...\n"
+    tar zxf lua-5.3.5.tar.gz
+    cd lua-5.3.5/
+    printf "[Info] Installing Lua 5.3.5...\n"
     sudo make linux test
     sudo make install
     sudo cp /usr/local/bin/lua /usr/bin/lua
@@ -43,8 +43,8 @@ done
 printf "[Info] Installing redis-dump...\n"
 sudo gem install redis-dump
 printf "[Info] Cleaning up installation files...\n"
-sudo rm -rf lua-5.3.4/
-sudo rm lua-5.3.4.tar.gz
+sudo rm -rf lua-5.3.5/
+sudo rm lua-5.3.5.tar.gz
 sudo rm -rf luarocks/
 sudo -k
 printf "[Info] Installation complete.\n"

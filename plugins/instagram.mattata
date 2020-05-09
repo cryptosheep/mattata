@@ -22,7 +22,6 @@ function instagram.get_profile_pic(username)
         return false, "No username provided!"
     end
     local jstr, res = https.request('https://www.instadp.com/api/s2/' .. url.escape(username))
-    print(res)
     if res ~= 200 then
         return false, "Connection error!"
     end
