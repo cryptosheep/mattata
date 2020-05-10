@@ -324,7 +324,7 @@ function mattata:on_message()
                         configuration.log_chat)
                     end
                     self.is_done = true
-                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and message.reply then
+                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and message.reply and not mattata.get_setting(message.chat.id, 'inline captcha') then
                     if message.reply.from.id == self.info.id and message.reply.photo then
                         if tostring(message.reply.message_id) == tostring(mattata.get_captcha_id(message.chat.id, message.from.id)) then
                             local id = mattata.get_captcha_id(message.chat.id, message.from.id)
@@ -352,7 +352,7 @@ function mattata:on_message()
                             end
                         end
                     end
-                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and mattata.get_captcha_id(message.chat.id, message.from.id) and not message.reply then
+                elseif not mattata.is_plugin_disabled(plugin.name, message) and mattata.get_setting(message.chat.id, 'require captcha') and mattata.get_captcha_id(message.chat.id, message.from.id) and not message.reply and not mattata.get_setting(message.chat.id, 'inline captcha') then
                     local id = mattata.get_captcha_id(message.chat.id, message.from.id)
                     local text = mattata.get_captcha_text(message.chat.id, message.from.id)
                     local original_msg = mattata.get_captcha_original_message(message.chat.id, message.from.id)
@@ -1418,7 +1418,7 @@ function mattata:process_message()
         end
     end
     if message.new_chat_members and message.chat.type ~= 'private' and mattata.get_setting(message.chat.id, 'use administration') and mattata.get_setting(message.chat.id, 'welcome message') then
-        local chat_member = mattata.get_chat_member(message.chat.id, message.new_chat_members[1].from.id)
+        local chat_member = mattata.get_chat_member(message.chat.id, message.new_chat_members[1].id)
         if chat_member.result.can_send_messages == false then
             return mattata.delete_message(message.chat.id, message.message_id)
         end

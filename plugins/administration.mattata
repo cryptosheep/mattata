@@ -7,7 +7,7 @@ local administration = {}
 local mattata = require('mattata')
 local json = require('dkjson')
 local redis = dofile('libs/redis.lua')
-local captcha = require('captcha')
+local captcha_lib = require('captcha')
 local configuration = require('configuration')
 
 function administration:init()
@@ -30,23 +30,81 @@ function administration:on_member_join(message, configuration, language)
         if download_location:match('/$') then
             download_location = download_location:match('^(.-)/$')
         end
-        local new_cap = captcha.new()
-        new_cap:setlength(6)
-        new_cap:setfontsize(40)
-        new_cap:setpath(download_location)
-        new_cap:setformat('jpg')
-        new_cap:setfontsfolder(configuration.fonts_directory)
-        local gen = new_cap:generate()
+        local new_captcha = captcha_lib.new()
+        new_captcha:setlength(6)
+        new_captcha:setfontsize(40)
+        new_captcha:setpath(download_location)
+        new_captcha:setformat('jpg')
+        new_captcha:setfontsfolder(configuration.fonts_directory)
+        local generated_captcha = new_captcha:generate()
         local username = message.new_chat_participant.username and '@' .. message.new_chat_participant.username or false
         local msg = string.format('Hey, [%s](tg://user?id=%s)! Please enter the CAPTCHA below before you can speak!', username or mattata.escape_markdown(message.new_chat_participant.first_name), message.new_chat_participant.id)
-        local correct = gen:match('^' .. download_location .. '/(.-)%.jpg$')
-        local to_edit = mattata.send_message(message.chat.id, msg, 'markdown')
-        local success = mattata.send_photo(message.chat.id, gen)
-        if not success then
-            return false
+        local correct = generated_captcha:match('^' .. download_location .. '/(.-)%.jpg$')
+        if not mattata.get_setting(message.chat.id, 'inline captcha') then
+            local to_edit = mattata.send_message(message.chat.id, msg, 'markdown')
+            local success = mattata.send_photo(message.chat.id, generated_captcha)
+            if not success then
+                return false
+            end
+            os.execute('rm ' .. generated_captcha)
+            mattata.set_captcha(message.chat.id, message.new_chat_participant.id, success.result.message_id, correct, to_edit.result.message_id, false)
+        else
+            local captchas = mattata.random_string(6, 6)
+            table.insert(captchas, correct)
+            table.sort(captchas)
+            local callback_data = string.format('administration:captcha:%s:%s', message.chat.id, message.new_chat_participant.id)
+            local keyboard = mattata.inline_keyboard():row(
+                mattata.row()
+                :callback_data_button(captchas[1], callback_data .. ':' .. captchas[1])
+                :callback_data_button(captchas[2], callback_data .. ':' .. captchas[2])
+                :callback_data_button(captchas[3], callback_data .. ':' .. captchas[3])
+            ):row(
+                mattata.row()
+                :callback_data_button(captchas[4], callback_data .. ':' .. captchas[4])
+                :callback_data_button(captchas[5], callback_data .. ':' .. captchas[5])
+                :callback_data_button(captchas[6], callback_data .. ':' .. captchas[6])
+            )
+            local photo_success = mattata.send_photo(message.chat.id, generated_captcha)
+            local success = mattata.send_message(message.chat.id, msg, 'markdown', true, false, nil, keyboard)
+            if not photo_success or not success then
+                return false
+            end
+            os.execute('rm ' .. generated_captcha)
+            local ban = mattata.restrict_chat_member(message.chat.id, message.new_chat_participant.id, 'forever', false, false, false, false, false, false, false, false)
+            if not ban then
+                return false
+            end
+            mattata.set_captcha(message.chat.id, message.new_chat_participant.id, photo_success.result.message_id, correct, success.result.message_id, true)
         end
-        mattata.set_captcha(message.chat.id, message.new_chat_participant.id, success.result.message_id, correct, to_edit.result.message_id)
-        return mattata.delete_message(message.chat.id, message.message_id) 
+        return mattata.delete_message(message.chat.id, message.message_id)
+    end
+end
+
+function administration:on_captcha_callback(callback_query, message, configuration)
+    if callback_query.data == 'nil' then
+        return mattata.answer_callback_query(callback_query.id)
+    end
+    local chat_id, user_id, guess = callback_query.data:match('^captcha:(.-):(.-):(.-)$')
+    if callback_query.from.id ~= tonumber(user_id) then
+        return mattata.answer_callback_query(callback_query.id, 'This isn\'t your CAPTCHA!')
+    end
+    local correct = mattata.get_captcha_text(chat_id, callback_query.from.id)
+    local id = mattata.get_captcha_original_message(chat_id, callback_query.from.id)
+    local photo_id = mattata.get_captcha_id(chat_id, callback_query.from.id)
+    mattata.wipe_redis_captcha(chat_id, callback_query.from.id) -- we're done with this now
+    if guess:lower() == correct:lower() then
+        local success = mattata.restrict_chat_member(chat_id, callback_query.from.id, 'forever', true, true, true, true, true, false, false, false)
+        if not success then
+            mattata.delete_message(chat_id, tonumber(photo_id))
+            return mattata.edit_message_text(message.chat.id, tonumber(id), 'I could not give that user their permissions. You may have to do this manually!')
+        end
+        mattata.delete_message(chat_id, tonumber(photo_id))
+        mattata.delete_message(chat_id, tonumber(id))
+        return mattata.answer_callback_query(callback_query.id, 'Success! You may now speak!')
+    else
+        mattata.delete_message(chat_id, tonumber(photo_id))
+        mattata.delete_message(chat_id, tonumber(id))
+        return mattata.answer_callback_query(callback_query.id, 'You got it wrong! Consult an admin if you wish to be unmuted!')
     end
 end
 
@@ -182,6 +240,14 @@ function administration.get_initial_keyboard(chat_id, page)
             :callback_data_button(
                 mattata.get_setting(chat_id, 'require captcha') and utf8.char(9989) or utf8.char(10060),
                 'administration:' .. chat_id .. ':require_captcha:3'
+            )
+        )
+        :row(
+            mattata.row()
+            :callback_data_button('Use Inline Captcha?', 'administration:nil')
+            :callback_data_button(
+                mattata.get_setting(chat_id, 'inline captcha') and utf8.char(9989) or utf8.char(10060),
+                'administration:' .. chat_id .. ':inline_captcha:3'
             )
         ):row(mattata.row():callback_data_button('Back', 'administration:' .. chat_id .. ':page:2'))
     end
@@ -452,9 +518,10 @@ function administration.warn(message)
 end
 
 function administration:on_callback_query(callback_query, message, configuration)
-    if callback_query.data == 'nil'
-    then
+    if callback_query.data == 'nil' then
         return mattata.answer_callback_query(callback_query.id)
+    elseif callback_query.data:match('^captcha:.-$') then
+        return administration.on_captcha_callback(self, callback_query, message, configuration)
     elseif not mattata.is_group_admin(
         callback_query.data:match('^(%-%d+)'),
         callback_query.from.id
@@ -697,6 +764,14 @@ function administration:on_callback_query(callback_query, message, configuration
         mattata.toggle_setting(
             chat_id,
             'require captcha'
+        )
+        keyboard = administration.get_initial_keyboard(chat_id, page)
+    elseif callback_query.data:match('^%-%d+:inline_captcha:%d*$')
+    then
+        local chat_id, page = callback_query.data:match('^(%-%d+):inline_captcha:(%d*)$')
+        mattata.toggle_setting(
+            chat_id,
+            'inline captcha'
         )
         keyboard = administration.get_initial_keyboard(chat_id, page)
     elseif callback_query.data:match('^%-%d+:enable_admins_only:%d*$')
