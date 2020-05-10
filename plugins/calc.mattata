@@ -158,7 +158,7 @@ function calc:on_inline_query(inline_query, configuration, language)
     end
     input = calc.process_input(input)
     local str, res = http.request(calc.url .. url.escape(input))
-    if res ~= 200 then
+    if res ~= 200 or not str then
         return false
     end
     local description = language['calc']['1']
@@ -168,7 +168,7 @@ function calc:on_inline_query(inline_query, configuration, language)
     :id(1)
     :title(str)
     :description(description)
-    :message_content(message_content)
+    :input_message_content(message_content)
     return mattata.answer_inline_query(inline_query.id, result)
 end
 
