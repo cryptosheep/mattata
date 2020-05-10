@@ -1,5 +1,6 @@
 local utils = {}
 local redis = dofile('libs/redis.lua')
+local socket = require('socket')
 local configuration = require('configuration')
 
 local mattata = {}
@@ -131,10 +132,16 @@ function utils.get_log_chat(chat_id)
     return redis:hget('chat:' .. chat_id .. ':settings', 'log chat') or configuration.log_channel or false
 end
 
-function utils.set_captcha(chat_id, user_id, id, text, original_message)
-    redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'id', id)
-    redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'text', text)
-    return redis:hset('chat:' .. chat_id .. ':captcha:' .. user_id, 'original message', original_message)
+function utils.set_captcha(chat_id, user_id, id, text, original_message, is_inline)
+    local hash = string.format('chat:%s:captcha:%s', chat_id, user_id)
+    redis:hset(hash, 'id', id)
+    redis:hset(hash, 'text', text)
+    redis:hset(hash, 'original message', original_message)
+    return redis:hset(hash, 'is inline', is_inline)
+end
+
+function utils.is_inline_captcha(chat_id, user_id)
+    return redis:hget('chat:' .. chat_id .. ':captcha:' .. user_id, 'is inline')
 end
 
 function utils.get_captcha_id(chat_id, user_id)
@@ -151,6 +158,13 @@ end
 
 function utils.delete_redis_hash(hash, field)
     return redis:hdel(hash, field)
+end
+
+function utils.wipe_redis_captcha(chat_id, user_id)
+    redis:hdel('chat:' .. chat_id .. ':captcha:' .. user_id, 'original message')
+    redis:hdel('chat:' .. chat_id .. ':captcha:' .. user_id, 'id')
+    redis:hdel('chat:' .. chat_id .. ':captcha:' .. user_id, 'text')
+    redis:hdel('chat:' .. chat_id .. ':captcha:' .. user_id, 'is inline')
 end
 
 function utils.get_missing_languages(delimiter)
@@ -456,6 +470,66 @@ _G.string.hexdump = function(data, length, size, space)
         column = column + 1
     end
     return table.concat(output)
+end
+
+function utils.format_time(seconds)
+    if not seconds or tonumber(seconds) == nil then
+        return false
+    end
+    local output = ''
+    seconds = tonumber(seconds) -- Make sure we're handling a numerical value
+    local minutes = math.floor(seconds / 60)
+    if minutes == 0 then
+        return seconds ~= 1 and seconds .. ' seconds' or seconds .. ' second'
+    elseif minutes < 60 then
+        return minutes ~= 1 and minutes .. ' minutes' or minutes .. ' minute'
+    end
+    local hours = math.floor(seconds / 3600)
+    if hours == 0 then
+        return minutes ~= 1 and minutes .. ' minutes' or minutes .. ' minute'
+    elseif hours < 24 then
+        return hours ~= 1 and hours .. ' hours' or hours .. ' hour'
+    end
+    local days = math.floor(seconds / 86400)
+    if days == 0 then
+        return hours ~= 1 and hours .. ' hours' or hours .. ' hour'
+    elseif days < 7 then
+        return days ~= 1 and days .. ' days' or days .. ' day'
+    end
+    local weeks = math.floor(seconds / 604800)
+    if weeks == 0 then
+        return days ~= 1 and days .. ' days' or days .. ' day'
+    else
+        return weeks ~= 1 and weeks .. ' weeks' or weeks .. ' week'
+    end
+end
+
+utils.random_string_charset = {}
+for i = 65, 90 do
+    table.insert(utils.random_string_charset, string.char(i))
+end
+for i = 97, 122 do
+    table.insert(utils.random_string_charset, string.char(i))
+end
+
+function utils.random_string(length, amount)
+    if not length or tonumber(length) <= 0 then
+        return ''
+    end
+    local command = io.popen('shuf -i 1-100000 -n 1') -- uses shuf for another random value because everything in lua is shocking
+    local seed = command:read('*all')
+    command:close()
+    seed = tonumber(seed) * socket.gettime()
+    math.randomseed(seed)
+    if amount and tonumber(amount) ~= nil then
+        local output = {}
+        for i = 1, tonumber(amount) do
+            local value = utils.random_string(length - 1) .. utils.random_string_charset[math.random(1, #utils.random_string_charset)]
+            table.insert(output, value)
+        end
+        return output
+    end
+    return utils.random_string(length - 1) .. utils.random_string_charset[math.random(1, #utils.random_string_charset)]
 end
 
 return utils
