@@ -5,7 +5,7 @@
     | | | | | | (_| | |_| || (_| | || (_| |
     |_| |_| |_|\__,_|\__|\__\__,_|\__\__,_|
 
-    Configuration file for mattata v1.2.0
+    Configuration file for mattata v1.2.1
 
     Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
@@ -146,7 +146,7 @@ return { -- Rename this file to configuration.lua for the bot to work!
     ['groups'] = {
         ['devTalk'] = 'https://t.me/devtalk',
         ['Off Topic Geeks'] = 'https://t.me/offtopicgeeks',
-        ['Let\'ts Talk Programming'] = 'https://t.me/letstalkprogramming',
+        ['Let\'s Talk Programming'] = 'https://t.me/letstalkprogramming',
         ['Silicon Off-Topic'] = 'https://t.me/siliconofftopic',
         ['Geeks Chat'] = 'https://t.me/geekschat',
         ['BotList Chat'] = 'https://t.me/botlistchat'
