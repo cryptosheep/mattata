@@ -36,6 +36,7 @@ end
 return { -- Rename this file to configuration.lua for the bot to work!
     ['bot_token'] = '', -- In order for the bot to actually work, you MUST insert the Telegram
     -- bot API token you received from @BotFather.
+    ['version'] = '1.2.1', -- the version of mattata, don't change this!
     -- The following two tokens will require you to have setup payments with @BotFather, and
     -- a Stripe account with @stripe!
     ['stripe_live_token'] = '', -- Payment token you receive from @BotFather.
@@ -48,14 +49,14 @@ return { -- Rename this file to configuration.lua for the bot to work!
     ['log_chat'] = -1000000000000, -- This needs to be the numerical identifier of the chat you wish to log
     -- errors into. If it's not a private chat it should begin with a '-' symbol.
     ['log_admin_actions'] = true, -- Should administrative actions be logged? [true/false]
-    ['log_channel'] = -1000000000000, -- This needs to be the numerical identifier of the channel you wish
+    ['log_channel'] = nil, -- This needs to be the numerical identifier of the channel you wish
     -- to log administrative actions in by default. It should begin with a '-' symbol.
     ['bug_reports_chat'] = -1000000000000, -- This needs to be the numerical identifier of the chat you wish to send
     -- bug reports into. If it's not a private chat it should begin with a '-' symbol.
-    ['counter_channel'] = -1000000000000, -- This needs to be the numerical identifier of the channel you wish
+    ['counter_channel'] = nil, -- This needs to be the numerical identifier of the channel you wish
     -- to forward messages into, for use with the /counter command. It should begin with a '-' symbol.
     ['download_location'] = '/tmp/', -- The location to save all downloaded media to.
-    ['fonts_directory'] = '/tmp/fonts', -- The location where fonts are stored for CAPTCHAs (this will be in the ./fonts folder that came in the repository)
+    ['fonts_directory'] = '/tmp/fonts', -- The location where fonts are stored for CAPTCHAs
     ['respond_to_misc'] = true, -- Respond to shitpostings/memes in mattata.lua? [true/false]
     ['max_copypasta_length'] = 300, -- The maximum number of characters a message can have to be
     -- able to have /copypasta used on it.
@@ -76,8 +77,9 @@ return { -- Rename this file to configuration.lua for the bot to work!
         ['weather'] = '', -- https://darksky.net/dev/register
         ['youtube'] = '', -- https://console.developers.google.com/apis
         ['maps'] = '', -- https://console.cloud.google.com/google/maps-apis
+        ['location'] = '', -- https://opencagedata.com/api
         ['bing'] = '', -- https://datamarket.azure.com/account/keys
-        ['flickr'] = '', -- https://www.flickr.com/services/apps/create/noncommercial/?
+        ['flickr'] = '', -- https://www.flickr.com/services/apps/create/noncommercial/
         ['news'] = '', -- https://newsapi.org/
         ['twitch'] = '', -- https://twitchapps.com/tmi/
         ['pastebin'] = '', -- https://pastebin.com/api
@@ -141,6 +143,15 @@ return { -- Rename this file to configuration.lua for the bot to work!
         'Howdy, NAME!',
         'Hi, NAME!'
     },
+    ['groups'] = {
+        ['devTalk'] = 'https://t.me/devtalk',
+        ['Off Topic Geeks'] = 'https://t.me/offtopicgeeks',
+        ['Let\'ts Talk Programming'] = 'https://t.me/letstalkprogramming',
+        ['Silicon Off-Topic'] = 'https://t.me/siliconofftopic',
+        ['Geeks Chat'] = 'https://t.me/geekschat',
+        ['BotList Chat'] = 'https://t.me/botlistchat'
+    },
+    ['sort_groups'] = true, -- Decides whether groups will be sorted by name in /groups.
     ['stickers'] = { -- Values used in mattata.lua, for administrative plugin functionality.
     -- These are the file_id values for stickers which are binded to the relevant command.
         ['ban'] = {

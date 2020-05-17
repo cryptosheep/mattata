@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -16,80 +16,43 @@ end
 function groups:on_message(message)
     local input = mattata.input(message.text)
     local output = {}
-    for k, v in pairs(
-        redis:smembers('mattata:configuration:chats')
-    )
-    do
-        if v
-        and json.decode(v).link
-        and json.decode(v).title
-        then
-            local link = json.decode(v).link
-            local title = json.decode(v).title
-            if input
-            then
+    for k, v in pairs(configuration.chats) do
+        if k and v then
+            local title = k
+            local link = v
+            if input then
                 local validate = pcall(
                     function()
                         return title:match(input)
                     end
                 )
-                if not validate
-                then
-                    return mattata.send_reply(
-                        message,
-                        'Your search query contains a malformed Lua pattern! If you\'re not sure what this means, try searching without any symbols.'
-                    )
+                if not validate then
+                    local output = 'Your search query contains a malformed Lua pattern! If you\'re not sure what this means, try searching without any symbols.'
+                    return mattata.send_reply(message, output)
                 end
             end
-            if (
-                input
-                and title:match(input)
-            )
-            or not input
-            then
-                table.insert(
-                    output,
-                    string.format(
-                        '• <a href="%s">%s</a>',
-                        mattata.escape_html(link),
-                        mattata.escape_html(title)
-                    )
-                )
+            if (input and title:match(input)) or not input then
+                local result = string.format('• <a href="%s">%s</a>', mattata.escape_html(link), mattata.escape_html(title))
+                table.insert(output, result)
             end
         end
     end
-    if not next(output)
-    then
+    if not next(output) then
         local output = 'No groups were found. If you\'d like your group to appear here, contact @wrxck0.'
-        if input
-        then
-            output = string.format(
-                'No groups were found matching "%s"! Use /groups to view a complete list of available groups.',
-                input
-            )
+        if input then
+            output = string.format('No groups were found matching "%s"! Use /groups to view a complete list of available groups.', input)
         end
-        return mattata.send_reply(
-            message,
-            output
-        )
+        return mattata.send_reply(message, output)
     end
-    table.sort(output)
-    output = table.concat(
-        output,
-        '\n'
-    )
-    if input
-    then
-        output = string.format(
-            'Groups found matching "%s":\n',
-            mattata.escape_html(input)
-        ) .. output
+    if configuration.sort_groups then
+        table.sort(output)
     end
-    return mattata.send_message(
-        message.chat.id,
-        output,
-        'html'
-    )
+    output = table.concat(output, '\n')
+    if input then
+        local heading = string.format('Groups found matching "%s":\n', mattata.escape_html(input))
+        output = heading .. output
+    end
+    return mattata.send_message(message.chat.id, output, 'html')
 end
 
 return groups

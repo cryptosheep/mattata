@@ -49,7 +49,7 @@ function administration:on_member_join(message, configuration, language)
             os.execute('rm ' .. generated_captcha)
             mattata.set_captcha(message.chat.id, message.new_chat_participant.id, success.result.message_id, correct, to_edit.result.message_id, false)
         else
-            local captchas = mattata.random_string(6, 6)
+            local captchas = mattata.random_string(6, 5)
             table.insert(captchas, correct)
             table.sort(captchas)
             local callback_data = string.format('administration:captcha:%s:%s', message.chat.id, message.new_chat_participant.id)
@@ -319,7 +319,6 @@ function administration.get_voteban_keyboard(chat_id)
         ),
         'required upvotes for vote bans'
     ) or 5
-    print(current_required_upvotes)
     local current_required_downvotes = redis:hget(
         string.format(
             'chat:%s:settings',
@@ -327,7 +326,6 @@ function administration.get_voteban_keyboard(chat_id)
         ),
         'required downvotes for vote bans'
     ) or 5
-    print(current_required_downvotes)
     table.insert(
         keyboard.inline_keyboard,
         {

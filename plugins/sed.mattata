@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -13,39 +13,30 @@ function sed:init()
 end
 
 function sed:on_callback_query(callback_query, message, configuration, language)
-    if not message.reply
-    then
-        return
-    end
-    if mattata.is_global_admin(callback_query.from.id)
-    then
+    if mattata.is_global_admin(callback_query.from.id) then -- we'll pull a sneaky on them
         callback_query.from = message.reply.from
     end
-    if message.reply.from.id ~= callback_query.from.id
-    then
-        return
+    if message.reply.from.id ~= callback_query.from.id then
+        return mattata.answer_callback_query(callback_query.id, 'That\'s not your place to say!')
     end
     local output = string.format(
         '<b>%s:</b>\n%s',
         message.text:match('^(.-):'),
         message.text:match(':\n(.-)$')
     )
-    if callback_query.data:match('^no$')
-    then
+    if callback_query.data:match('^no$') then
         output = string.format(
             language['sed']['1'],
             output,
             mattata.escape_html(callback_query.from.first_name)
         )
-    elseif callback_query.data:match('^yes$')
-    then
+    elseif callback_query.data:match('^yes$') then
         output = string.format(
             language['sed']['2'],
             output,
             mattata.escape_html(callback_query.from.first_name)
         )
-    elseif callback_query.data:match('^maybe$')
-    then
+    elseif callback_query.data:match('^maybe$') then
         output = string.format(
             language['sed']['3'],
             output,
@@ -85,8 +76,7 @@ function sed:on_message(message, configuration, language)
             return message.reply.text:gsub(matches, substitution)
         end
     )
-    if not success
-    then
+    if not success then
         return mattata.send_reply(
             message,
             string.format(

@@ -532,4 +532,38 @@ function utils.random_string(length, amount)
     return utils.random_string(length - 1) .. utils.random_string_charset[math.random(1, #utils.random_string_charset)]
 end
 
+function utils.set_command_action(chat_id, message_id, command)
+    local hash = string.format('action:%s:%s', chat_id, message_id)
+    return redis:set(hash, command)
+end
+
+function utils.increase_administrative_action(chat_id, user_id, action, increase_by)
+    if not increase_by or tonumber(increase_by) == nil then
+        increase_by = 1
+    end
+    local hash = string.format('chat:%s:%s', chat_id, user_id)
+    return redis:hincrby(hash, action, increase_by)
+end
+
+function utils.is_whitelisted_link(link)
+    if link == 'username' or link == 'isiswatch' or link == 'mattata' or link == 'telegram' then
+        return true
+    end
+    return false
+end
+
+function utils.is_valid(message) -- Performs basic checks on the message object to see if it's fit
+-- for its purpose. If it's valid, this function will return `true` - otherwise it will return `false`.
+    if not message then -- If the `message` object is nil, then we'll ignore it.
+        return false, 'No `message` object exists!'
+    elseif message.date < os.time() - 7 then -- We don't want to process old messages, so anything
+    -- older than the current system time (giving it a leeway of 7 seconds).
+        return false, 'This `message` object is too old!'
+    elseif not message.from then -- If the `message.from` object doesn't exist, this will likely
+    -- break some more code further down the line!
+        return false, 'No `message.from` object exists!'
+    end
+    return true
+end
+
 return utils

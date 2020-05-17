@@ -5,7 +5,7 @@
       | | | | | | (_| | |_| || (_| | || (_| |
       |_| |_| |_|\__,_|\__|\__\__,_|\__\__,_|
 
-      v1.2.0
+      v1.2.1
 
       Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
       See LICENSE for details
@@ -34,9 +34,7 @@ function mattata:init()
     mattata.info = api.info
     self.plugins = {} -- Make a table for the bot's plugins.
     self.api = api
-    mattata.api = api
     self.tools = tools
-    mattata.tools = tools
     self.configuration = configuration
     for k, v in ipairs(configuration.plugins) do -- Iterate over all of the configured plugins.
         local plugin = dofile('plugins/' .. v .. '.mattata') -- Load each plugin.
@@ -65,7 +63,7 @@ function mattata:init()
     print(connected_message)
     local info_message = '\tUsername: @' .. self.info.username .. '\n\tName: ' .. self.info.name .. '\n\tID: ' .. self.info.id
     print('\n' .. info_message .. '\n')
-    self.version = 'v1.1.0'
+    self.version = configuration.version or '1.2.0' -- version wasn't put into configuration until 1.2.1
     -- Make necessary database changes if the version has changed.
     if not redis:get('mattata:version') or redis:get('mattata:version') ~= self.version then
         redis:set('mattata:version', self.version)
@@ -251,7 +249,10 @@ function mattata:on_message()
         return false
     end
     message = mattata.sort_message(message) -- Process the message.
-    self.is_user_blacklisted = mattata.is_user_blacklisted(message)
+    self.is_user_blacklisted, self.is_globally_banned = mattata.is_user_blacklisted(message)
+    if self.is_globally_banned then -- Only for the worst of the worst
+        mattata.ban_chat_member(message.chat.id, message.from.id)
+    end
 
     local language = require('languages.' .. mattata.get_user_language(message.from.id))
     if mattata.is_group(message) and mattata.get_setting(message.chat.id, 'force group language') then
@@ -545,7 +546,9 @@ function mattata:on_callback_query()
         end
     end
     for _, plugin in ipairs(self.plugins) do
-        if plugin.name == callback_query.data:match('^(.-):.-$') and plugin.on_callback_query then
+        if not callback_query.data then
+            return false
+        elseif plugin.name == callback_query.data:match('^(.-):.-$') and plugin.on_callback_query then
             callback_query.data = callback_query.data:match('^%a+:(.-)$')
             if not callback_query.data then
                 plugin = callback_query.data
@@ -702,7 +705,7 @@ end
 function mattata.process_chat(chat)
     chat.id_str = tostring(chat.id)
     if chat.type == 'private' then
-        return chat
+        return mattata.process_user(chat)
     end
     if not redis:hexists('chat:' .. chat.id .. ':info', 'id') then
         print(
@@ -985,25 +988,6 @@ function mattata.save_to_file(content, file_path)
     return true
 end
 
-function mattata.export_ai_responses(save)
-    local output = {}
-    for k, v in pairs(redis:hgetall('ai')) do
-        v = json.decode(v)
-        v['message'] = nil
-        local responses = v['responses']
-        v['responses'] = nil
-        for n, response in pairs(responses) do
-            table.insert(output, response)
-        end
-        output[k] = v
-    end
-    output = json.encode(output, { ['indent'] = true })
-    if save then
-        return mattata.save_to_file(output, '/tmp/ai.json')
-    end
-    return output
-end
-
 function mattata.insert_keyboard_row(keyboard, first_text, first_callback, second_text, second_callback, third_text, third_callback)
     table.insert(
         keyboard['inline_keyboard'],
@@ -1025,32 +1009,20 @@ function mattata.insert_keyboard_row(keyboard, first_text, first_callback, secon
     return keyboard
 end
 
-function mattata.is_valid(message) -- Performs basic checks on the message object to see if it's fit
--- for its purpose. If it's valid, this function will return `true` - otherwise it will return `false`.
-    if not message then -- If the `message` object is nil, then we'll ignore it.
-        return false, 'No `message` object exists!'
-    elseif message.date < os.time() - 7 then -- We don't want to process old messages, so anything
-    -- older than the current system time (giving it a leeway of 7 seconds).
-        return false, 'This `message` object is too old!'
-    elseif not message.from then -- If the `message.from` object doesn't exist, this will likely
-    -- break some more code further down the line!
-        return false, 'No `message.from` object exists!'
-    end
-    return true
-end
-
 function mattata.is_user_blacklisted(message)
     if not message or not message.from or not message.chat then
-        return false
+        return false, false
     end
     local global = redis:get('global_blacklist:' .. message.from.id) -- Check if the user is globally
     -- blacklisted from using the bot.
     local group = redis:get('group_blacklist:' .. message.chat.id .. ':' .. message.from.id) -- Check
     -- if the user is blacklisted from using the bot in the current group.
-    if global or group then
-        return true
+    if global then
+        return true, true
+    elseif group then
+        return true, false
     end
-    return false
+    return false, false
 end
 
 function mattata.process_afk(message) -- Checks if the message references an AFK user and tells the
@@ -1337,17 +1309,6 @@ function mattata.check_links(message, get_links, only_valid, whitelist)
     return false
 end
 
-function mattata.is_whitelisted_link(link)
-    if link == 'username' or link == 'isiswatch' or link == 'mattata' or link == 'telegram' then
-        return true
-    end
-    return false
-end
-
-function mattata.uses_administration(chat_id)
-    return mattata.get_setting(message.chat.id, 'use administration')
-end
-
 function mattata:process_message()
     local message = self.message
     local language = self.language
@@ -1486,6 +1447,10 @@ end
 
 function mattata.is_privacy_enabled(user_id)
     return redis:exists('user:' .. user_id .. ':opt_out')
+end
+
+function mattata.uses_administration(chat_id)
+    return mattata.get_setting(chat_id, 'use administration')
 end
 
 return mattata

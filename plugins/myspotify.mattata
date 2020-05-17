@@ -17,29 +17,16 @@ function myspotify:init()
 end
 
 function myspotify.get_keyboard(user_id, language, force_playing_state)
-    local is_playing = myspotify.get_current_state(
-        user_id,
-        true
-    )
-    if force_playing_state
-    then
+    local is_playing = myspotify.get_current_state(user_id, true)
+    if force_playing_state then
         is_playing = true
     end
     return mattata.inline_keyboard()
     :row(
         mattata.row()
-        :callback_data_button(
-            language['myspotify']['1'],
-            'myspotify:profile:' .. user_id
-        )
-        :callback_data_button(
-            language['myspotify']['2'],
-            'myspotify:following:' .. user_id
-        )
-        :callback_data_button(
-            language['myspotify']['3'],
-            'myspotify:recentlyplayed:' .. user_id
-        )
+        :callback_data_button(language['myspotify']['1'], 'myspotify:profile:' .. user_id)
+        :callback_data_button(language['myspotify']['2'], 'myspotify:following:' .. user_id)
+        :callback_data_button(language['myspotify']['3'], 'myspotify:recentlyplayed:' .. user_id)
     )
     :row(
         mattata.row()
@@ -718,10 +705,12 @@ function myspotify.previous_track(user_id)
             ['url'] = 'https://api.spotify.com/v1/me/player/previous',
             ['method'] = 'POST',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
     )
+    print(res)
     if res == 200
     or res == 204
     then
@@ -747,6 +736,7 @@ function myspotify.next_track(user_id)
             ['url'] = 'https://api.spotify.com/v1/me/player/next',
             ['method'] = 'POST',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
@@ -771,6 +761,7 @@ function myspotify.play(user_id)
             ['url'] = 'https://api.spotify.com/v1/me/player/play',
             ['method'] = 'PUT',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
@@ -798,6 +789,7 @@ function myspotify.pause(user_id)
             ['url'] = 'https://api.spotify.com/v1/me/player/pause',
             ['method'] = 'PUT',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
@@ -889,6 +881,7 @@ function myspotify.shuffle(user_id)
             ['url'] = 'https://api.spotify.com/v1/me/player/shuffle?state=true',
             ['method'] = 'PUT',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
@@ -923,6 +916,7 @@ function myspotify.set_volume(user_id, volume)
             ['url'] = 'https://api.spotify.com/v1/me/player/volume?volume_percent=' .. volume,
             ['method'] = 'PUT',
             ['headers'] = {
+                ['Content-Length'] = 0,
                 ['Authorization'] = 'Bearer ' .. redis:get('spotify:' .. user_id .. ':access_token')
             }
         }
