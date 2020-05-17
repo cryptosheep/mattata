@@ -2,7 +2,9 @@
 
 Notice: mattata has now resumed development, as of 1st May 2020. For more information, head on over to our [development group](https://telegram.me/mattataDev) on [Telegram](https://telegram.org), or alternatively our [Discord](https://discord.gg/KHQuXaZ).
 
-mattata is a powerful, plugin-based Telegram bot similar to [topkecleon's](https://github.com/topkecleon/otouto). mattata boasts many nifty features such as a fully-fledged administration plugin, AI (native Cleverbot implementation, which utilises my [mattata-ai](https://github.com/wrxck/mattata-ai) library) and much more.
+mattata is a powerful, plugin-based Telegram bot similar to [topkecleon's](https://github.com/topkecleon/otouto), with administrative abilities and so much more.
+
+The licensing situation is currently [under investigation](https://github.com/topkecleon/otouto/issues/123), but **don't panic**, it'll get resolved cleanly.
 
 ![Setup](https://raw.githubusercontent.com/wrxck/mattata/master/assets/setup.png)
 
@@ -11,7 +13,7 @@ You'll need sudo access to be able to install the dependencies required. Then, y
 
 ![Plugins](https://raw.githubusercontent.com/wrxck/mattata/master/assets/plugins.png)
 
-mattata features an extensive, robust plugin system, similar to [topkecleon's](https://github.com/topkecleon/otouto). Below is a table containing a list of currently-documented plugins and their corresponding usage information.
+mattata features an extensive, robust plugin system, similar to [topkecleon's](https://github.com/topkecleon/otouto), with some plugins being based on his code. Below is a table containing a list of currently-documented plugins and their corresponding usage information.
 
 | Command                                            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                    | Aliases          | Flag |
 |----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|------|
