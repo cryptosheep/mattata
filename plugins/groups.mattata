@@ -13,7 +13,7 @@ function groups:init()
     groups.help = '/groups [query] - View a list of mattata\'s groups (that is, all of the ones added by the bot owner), or search for groups by passing a Lua pattern as a command argument.'
 end
 
-function groups:on_message(message)
+function groups:on_message(message, configuration, language)
     local input = mattata.input(message.text)
     local output = {}
     for k, v in pairs(configuration.chats) do
