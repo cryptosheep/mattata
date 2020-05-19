@@ -731,9 +731,8 @@ function mattata.process_chat(chat)
 end
 
 function mattata.process_user(user)
-    if not user.id or not user.first_name then
-        return false
-    end
+    if not user then return user end
+    if not user.id or not user.first_name then return false end
     local new = false
     user.name = user.first_name
     if user.last_name then
@@ -836,11 +835,11 @@ function mattata.sort_message(message)
         end
         if message.new_chat_members then
             message.chat = mattata.process_chat(message.chat)
-            message.new_chat_members[i] = mattata.process_user(message.new_chat_members[i])
-            if configuration.administration.store_chat_users then
-                for i = 1, #message.new_chat_members do -- add users to the chat's set in the database
-                    redis:sadd('chat:' .. message.chat.id .. ':users', message.new_chat_members[i].id)
+            for i = 1, #message.new_chat_members do 
+                if configuration.administration.store_chat_users then
+                    redis:sadd('chat:' .. message.chat.id .. ':users', message.new_chat_members[i].id) -- add users to the chat's set in the database
                 end
+                message.new_chat_members[i] = mattata.process_user(message.new_chat_members[i])
             end
         elseif message.left_chat_member then -- if they've left the chat then there's no need for them to be in the set anymore
             message.chat = mattata.process_chat(message.chat)
