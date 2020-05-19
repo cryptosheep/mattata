@@ -5,7 +5,7 @@
     | | | | | | (_| | |_| || (_| | || (_| |
     |_| |_| |_|\__,_|\__|\__\__,_|\__\__,_|
 
-    Configuration file for mattata v1.2.1
+    Configuration file for mattata v1.2.2
 
     Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
@@ -15,28 +15,10 @@
 
 ]]
 
-local get_plugins = function(extension, directory)
-    extension = extension and tostring(extension) or 'mattata'
-    if extension:match('^%.') then
-        extension = extension:match('^%.(.-)$')
-    end
-    directory = directory and tostring(directory) or 'plugins'
-    if directory:match('/$') then
-        directory = directory:match('^(.-)/$')
-    end
-    local plugins = {}
-    local all = io.popen('mkdir -p ' .. directory .. '; ls ' .. directory .. '/'):read('*all')
-    for plugin in all:gmatch('[%w_-]+%.' .. extension .. ' ?') do
-        plugin = plugin:match('^([%w_-]+)%.' .. extension .. ' ?$')
-        table.insert(plugins, plugin)
-    end
-    return plugins
-end
-
-return { -- Rename this file to configuration.lua for the bot to work!
-    ['bot_token'] = '', -- In order for the bot to actually work, you MUST insert the Telegram
+local configuration = { -- Rename this file to configuration.lua for the bot to work!
+    ['bot_token'] = '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11', -- In order for the bot to actually work, you MUST insert the Telegram
     -- bot API token you received from @BotFather.
-    ['version'] = '1.2.1', -- the version of mattata, don't change this!
+    ['version'] = '1.2.2', -- the version of mattata, don't change this!
     -- The following two tokens will require you to have setup payments with @BotFather, and
     -- a Stripe account with @stripe!
     ['stripe_live_token'] = '', -- Payment token you receive from @BotFather.
@@ -44,6 +26,10 @@ return { -- Rename this file to configuration.lua for the bot to work!
     ['admins'] = {  -- Here you need to specify the numerical ID of the users who shall have
     -- FULL control over the bot, this includes access to server files via the lua and shell plugins.
         221714512
+    },
+    ['updates'] = {
+        ['timeout'] = 1, -- timeout in seconds for api.get_updates()
+        ['limit'] = 100 -- message limit for api.get_updates() - must be between 1-100
     },
     ['language'] = 'en', -- The two character locale to set your default language to.
     ['log_chat'] = -1000000000000, -- This needs to be the numerical identifier of the chat you wish to log
@@ -61,7 +47,6 @@ return { -- Rename this file to configuration.lua for the bot to work!
     ['max_copypasta_length'] = 300, -- The maximum number of characters a message can have to be
     -- able to have /copypasta used on it.
     ['debug'] = false, -- Turn this on to print EVEN MORE information to the terminal.
-    ['plugins'] = get_plugins(),
     ['redis'] = { -- Configurable options for connecting the bot to redis. Do NOT modify
     -- these settings if you don't know what you're doing!
         ['host'] = '127.0.0.1',
@@ -100,7 +85,7 @@ return { -- Rename this file to configuration.lua for the bot to work!
         ['spotify'] = { -- https://developer.spotify.com/my-applications/#!/applications/create
             ['client_id'] = '',
             ['client_secret'] = '',
-            ['redirect_uri'] = ''
+            ['redirect_uri'] = 'https://t.me/mattatabot?start='
         },
         ['twitter'] = { -- https://apps.twitter.com/app/new
             ['consumer_key'] = '',
@@ -133,6 +118,13 @@ return { -- Rename this file to configuration.lua for the bot to work!
         ['warnings'] = {
             ['maximum'] = 10,
             ['minimum'] = 2
+        },
+        ['store_chat_members'] = true,
+        ['global_antispam'] = { -- normal antispam is processed in plugins/antispam.mattata
+            ['ttl'] = 5, -- amount of seconds to process the messages in
+            ['message_warning_amount'] = 7, -- amount of messages a user can send in the TTL until they're warned
+            ['message_blacklist_amount'] = 15, -- amount of messages a user can send in the TTL until they're blacklisted
+            ['blacklist_length'] = 86400 -- amount (in seconds) to blacklist the user for
         }
     },
     ['join_messages'] = { -- Values used in plugins/administration.lua.
@@ -149,7 +141,8 @@ return { -- Rename this file to configuration.lua for the bot to work!
         ['Let\'s Talk Programming'] = 'https://t.me/letstalkprogramming',
         ['Silicon Off-Topic'] = 'https://t.me/siliconofftopic',
         ['Geeks Chat'] = 'https://t.me/geekschat',
-        ['BotList Chat'] = 'https://t.me/botlistchat'
+        ['BotList Chat'] = 'https://t.me/botlistchat',
+        ['Group List Discussion'] = 'https://t.me/grouplistdiscussion'
     },
     ['sort_groups'] = true, -- Decides whether groups will be sorted by name in /groups.
     ['stickers'] = { -- Values used in mattata.lua, for administrative plugin functionality.
@@ -167,6 +160,28 @@ return { -- Rename this file to configuration.lua for the bot to work!
         }
     }
 }
+
+local get_plugins = function(extension, directory)
+    extension = extension and tostring(extension) or 'mattata'
+    if extension:match('^%.') then
+        extension = extension:match('^%.(.-)$')
+    end
+    directory = directory and tostring(directory) or 'plugins'
+    if directory:match('/$') then
+        directory = directory:match('^(.-)/$')
+    end
+    local plugins = {}
+    local all = io.popen('mkdir -p ' .. directory .. '; ls ' .. directory .. '/'):read('*all')
+    for plugin in all:gmatch('[%w_-]+%.' .. extension .. ' ?') do
+        plugin = plugin:match('^([%w_-]+)%.' .. extension .. ' ?$')
+        table.insert(plugins, plugin)
+    end
+    return plugins
+end
+
+configuration.plugins = get_plugins()
+
+return configuration
 
 --[[
 

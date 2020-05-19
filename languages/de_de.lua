@@ -105,6 +105,16 @@ return {
     ['copypasta'] = {
         ['1'] = 'Der Antowrten-zu text kann nicht länger sein als %s Zeichen!'
     },
+    ['coronavirus'] = {
+        ['1'] = [[*COVID-19 Statistics for:* %s
+
+*New confirmed cases:* %s
+*Total confirmed cases:* %s
+*New deaths:* %s
+*Total deaths:* %s
+*New recovered cases:* %s
+*Total recovered cases:* %s]]
+    },
     ['custom'] = {
         ['1'] = 'Erfolg! Die Nachricht wird nun jedesmal gesendet wen jemand %s benutzt!',
         ['2'] = 'Der Auslöser "%s" existiert nicht!',

@@ -1,5 +1,5 @@
 --[[
-    Copyright 2017 Matthew Hesketh <wrxck0@gmail.com>
+    Copyright 2020 Matthew Hesketh <wrxck0@gmail.com>
     This code is licensed under the MIT. See LICENSE for details.
 ]]
 
@@ -8,46 +8,51 @@ local mattata = require('mattata')
 local json = require('dkjson')
 
 function id:init()
-    id.commands = mattata.commands(self.info.username)
-    :command('id')
-    :command('whoami').table
+    id.commands = mattata.commands(self.info.username):command('id'):command('whoami').table
     id.help = '/id [chat] - Sends information about the given chat. Input is also accepted via reply. Alias: /whoami.'
 end
 
-function id.resolve_chat(message, language)
-    if not message.query then
-        mattata.send_chat_action(message.chat.id)
-    end
+function id.resolve_chat(input, language, send_chat_action)
     local output = {}
-    local input = message.query and message.query or mattata.get_input(message)
     if not input then
-        input = message.from.id
+        return false
     end
-    if tonumber(input) == nil and not input:match('^%@') then
-        input = '@' .. input
-    end
-    local success = mattata.get_user(input)
-    if not success then
-        success = mattata.get_chat(input)
-    else
-        success = mattata.get_chat(success.result.id)
-    end
+    local success = mattata.get_user(input) or mattata.get_chat(input)
     if not success or not success.result then
         return language['id']['1']
     end
-    success.result.photo = nil -- We don't want to show the `file_id`, as these
-    -- make the message a lot longer than it needs to be.
-    success.result.id_str = nil -- This is useless for the command, since we already
-    -- have the `id` field being returned.
-    local output = json.encode(success.result, { ['indent'] = true })
-    output = '<pre>' .. mattata.escape_html(output) .. '</pre>'
+    local output = {}
+    if success.result.type == 'private' then
+        local name = success.result.first_name
+        if success.result.last_name then
+            name = name .. ' ' .. success.result.last_name
+        end
+        table.insert(output, '<b>Name:</b> ' .. mattata.escape_html(name))
+        table.insert(output, '<b>ID:</b> ' .. success.result.id)
+        if success.result.username then
+            table.insert(output, '<b>Username:</b> ' .. success.result.username)
+        end
+        if success.result.bio and success.result.bio ~= '' then
+            table.insert(output, '<b>Bio:</b> <code>' .. mattata.escape_html(success.result.bio) .. '</code>')
+        end
+    else
+        table.insert(output, '<b>Title:</b> ' .. mattata.escape_html(success.result.title))
+        table.insert(output, '<b>ID:</b> ' .. success.result.id)
+        table.insert(output, '<b>Type:</b> ' .. success.result.type)
+        if success.result.username then
+            table.insert(output, '<b>Username:</b> @' .. success.result.username)
+        end
+        if success.result.description and success.result.description ~= '' then
+            table.insert(output, '<b>Description:</b> <code>' .. mattata.escape_html(success.result.description) .. '</code>')
+        end
+    end
     return output
 end
 
 function id:on_inline_query(inline_query, configuration, language)
-    inline_query.query = mattata.input(inline_query.query)
-    or inline_query.from.username
-    or inline_query.from.id
+    local input = mattata.input(inline_query.query) or inline_query.from.id
+    local output = id.resolve_chat(inline_query, language)
+    output = type(output) == 'table' and table.concat(output, '\n') or output
     return mattata.answer_inline_query(
         inline_query.id,
         mattata.inline_result()
@@ -58,28 +63,41 @@ function id:on_inline_query(inline_query, configuration, language)
         )
         :description(language['id']['4'])
         :input_message_content(
-            mattata.input_text_message_content(
-                tostring(
-                    id.resolve_chat(
-                        inline_query,
-                        language
-                    )
-                ),
-                'html'
-            )
+            mattata.input_text_message_content(output, 'html')
         )
     )
 end
 
 function id:on_message(message, configuration, language)
-    return mattata.send_message(
-        message,
-        id.resolve_chat(
-            message,
-            language
-        ),
-        'html'
-    )
+   local is_reply, is_reply_chat, old_chat_object = false, false, message.chat
+    if message.reply then
+        is_reply = true
+        message.from = message.reply.from
+        message.chat = message.reply.chat
+        if message.reply.forward_from then
+            message.from = message.reply.forward_from
+        end
+        if message.reply.forward_from_chat then
+            is_reply_chat = true
+            message.chat = message.reply.forward_from_chat
+        end
+    end
+    mattata.send_chat_action(old_chat_object.id)
+    local has_input = mattata.input(message.text)
+    local input = mattata.input(message.text) or message.from.id
+    local output = id.resolve_chat(input, language, true)
+    if not has_input and message.chat.type ~= 'private' and ((not is_reply) or is_reply_chat) then
+        table.insert(output, '')
+        local chat = id.resolve_chat(message.chat.id, language)
+        for k, v in pairs(chat) do
+            table.insert(output, v)
+        end
+    end
+    if is_reply_chat then
+        message.chat = old_chat_object
+    end
+    output = type(output) == 'table' and table.concat(output, '\n') or output
+    return mattata.send_message(message.chat.id, output, 'html')
 end
 
 return id

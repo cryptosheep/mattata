@@ -1,1 +1,1 @@
-return require('de_de')
+return require('languages.de_de')

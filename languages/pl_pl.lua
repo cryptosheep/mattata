@@ -105,6 +105,16 @@ return {
     ['copypasta'] = {
         ['1'] = 'Wiadomość na którą odpowiadasz tą komendą nie może być dłuższa niż %s znaków!'
     },
+    ['coronavirus'] = {
+        ['1'] = [[*COVID-19 Statistics for:* %s
+
+*New confirmed cases:* %s
+*Total confirmed cases:* %s
+*New deaths:* %s
+*Total deaths:* %s
+*New recovered cases:* %s
+*Total recovered cases:* %s]]
+    },
     ['counter'] = {
         ['1'] = 'Dodawanie licznika do wiadomości nie powiodło się!'
     },

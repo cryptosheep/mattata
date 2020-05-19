@@ -105,6 +105,16 @@ return {
     ['copypasta'] = {
         ['1'] = 'O texto respondido não deverá exceder %s caracteres!'
     },
+    ['coronavirus'] = {
+        ['1'] = [[*COVID-19 Statistics for:* %s
+
+*New confirmed cases:* %s
+*Total confirmed cases:* %s
+*New deaths:* %s
+*Total deaths:* %s
+*New recovered cases:* %s
+*Total recovered cases:* %s]]
+    },
     ['counter'] = {
         ['1'] = 'Eu não pude adicionar um contador a essa mensagem!'
     },
